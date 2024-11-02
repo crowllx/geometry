@@ -5,6 +5,7 @@ import "math"
 type Shape interface {
 	BB() BB
 	Translate(Vector)
+    Collides(Shape) bool
 }
 
 func CircleRectCollision(c *Circle, r *Rect) bool {

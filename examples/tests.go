@@ -22,7 +22,7 @@ func NewGame() *Game {
 			geometry.NewCircle(geometry.NewVector(300, 200), 100),
 			geometry.NewRect(200, 250, 250, 300),
 		},
-		geometry.NewCircle(geometry.NewVector(0,0), 30),
+		geometry.NewCircle(geometry.NewVector(0, 0), 30),
 		// &geometry.BB{0, 0, 50, 50},
 	}
 }
@@ -81,16 +81,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	DrawShape(g.player, screen)
 	for _, shape := range g.shapes {
-		if g.player.BB().Contains(shape.BB()) {
-			switch shape.(type) {
-			case *geometry.Circle:
-				if shape.(*geometry.Circle).Collides(g.player) {
-					ebitenutil.DebugPrint(screen, "intersection")
-					log.Println("true")
-				}
-			case *geometry.Rect:
-				ebitenutil.DebugPrint(screen, "intersection")
-			}
+		if g.player.Collides(shape) {
+			ebitenutil.DebugPrint(screen, "intersection!")
 		}
 	}
 }

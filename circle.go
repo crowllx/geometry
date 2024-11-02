@@ -33,15 +33,18 @@ func (c *Circle) Translate(v Vector) {
 }
 
 func (c *Circle) Collides(s Shape) bool {
-	switch s.(type) {
-	case *Rect:
-		return CircleRectCollision(c, s.(*Rect))
-    case *BB:
-        return CircleBBCollision(c, s.(*BB))
-    case *Circle:
-        return CircleCircleCollision(c, s.(*Circle))
-	default:
-		return false
+	if c.BB().Contains(s.BB()) {
+		switch s.(type) {
+		case *Rect:
+			return CircleRectCollision(c, s.(*Rect))
+		case *BB:
+			return CircleBBCollision(c, s.(*BB))
+		case *Circle:
+			return CircleCircleCollision(c, s.(*Circle))
+		default:
+			return false
+		}
 	}
+    return false
 
 }

@@ -29,3 +29,7 @@ func (r *Rect) Translate(v Vector) {
 	r.Min = r.Min.Add(v)
 	r.Max = r.Max.Add(v)
 }
+
+func (r *Rect) Collides(s Shape) bool {
+    return r.BB().Collides(s)
+}
