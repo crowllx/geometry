@@ -1,64 +1,47 @@
 package geometry
 
+import "math"
+
 type Shape interface {
-	Class() ShapeClass
 	BB() BB
+	Translate(Vector)
 }
 
-type ShapeClass int
+func CircleRectCollision(c *Circle, r *Rect) bool {
+	closestX := math.Max(r.Min.X, math.Min(c.center.X, r.Max.X))
+	closestY := math.Max(r.Min.Y, math.Min(c.center.Y, r.Max.Y))
+	dx := closestX - c.center.X
+	dy := closestY - c.center.Y
+	distance_squared := dx*dx + dy*dy
 
-type BB struct {
-	L, T, R, B float64
-}
-
-func (bb BB) Contains(other BB) bool {
-	if bb.R < other.L || bb.L > other.R {
-		return false
+	if distance_squared <= c.r*c.r {
+		return true
 	}
-	if bb.B < other.T || bb.T > other.B {
-		return false
+	return false
+}
+
+func CircleBBCollision(c *Circle, bb *BB) bool {
+	closestX := math.Max(bb.L, math.Min(c.center.X, bb.R))
+	closestY := math.Max(bb.T, math.Min(c.center.Y, bb.B))
+	dx := closestX - c.center.X
+	dy := closestY - c.center.Y
+	distanceSquared := dx*dx + dy*dy
+
+	if distanceSquared <= c.r*c.r {
+		return true
 	}
-	return true
+	return false
 }
 
-const (
-	RECT = iota
-	CIRCLE
-)
+func CircleCircleCollision(cl *Circle, cr *Circle) bool {
+	dx := cr.center.X - cl.center.X
+	dy := cr.center.Y - cl.center.Y
+	distanceSquared := dx*dx + dy*dy
+	radiiSum := cl.r + cr.r
+	radiiSumSquared := radiiSum * radiiSum
 
-type Rect struct {
-	Min   Vector
-	Max   Vector
-	class ShapeClass
-}
-
-func (r Rect) Bounds() (float64, float64) {
-	dx := r.Max.X - r.Min.X
-	dy := r.Max.Y - r.Min.Y
-	return dx, dy
-}
-func (r Rect) BB() BB {
-	return BB{
-		r.Min.X, r.Min.Y, r.Max.X, r.Max.Y,
+	if distanceSquared <= radiiSumSquared {
+		return true
 	}
-}
-
-func (r Rect) Scale(v Vector) Rect {
-	r.Min = r.Min.Add(v)
-	r.Max = r.Max.Add(v)
-	return r
-}
-
-func NewRect(x0, y0, x1, y1 float64) Rect {
-	return Rect{
-		NewVector(x0, y0),
-		NewVector(x1, y1),
-		RECT,
-	}
-}
-
-var _ Shape = Rect{}
-
-func (r Rect) Class() ShapeClass {
-	return r.class
+	return false
 }
