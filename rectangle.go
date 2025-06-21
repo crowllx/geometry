@@ -1,8 +1,8 @@
 package geometry
 
 type Rect struct {
-	Min   Vector
-	Max   Vector
+	Min Vector
+	Max Vector
 }
 
 func (r *Rect) Bounds() (float64, float64) {
@@ -10,6 +10,7 @@ func (r *Rect) Bounds() (float64, float64) {
 	dy := r.Max.Y - r.Min.Y
 	return dx, dy
 }
+
 func (r *Rect) BB() BB {
 	return BB{
 		r.Min.X, r.Min.Y, r.Max.X, r.Max.Y,
@@ -31,5 +32,13 @@ func (r *Rect) Translate(v Vector) {
 }
 
 func (r *Rect) Collides(s Shape) bool {
-    return r.BB().Collides(s)
+	if r.BB().Contains(s.BB()) {
+		switch s := s.(type) {
+		case *Circle:
+			return CircleRectCollision(s, r)
+		default:
+			return true
+		}
+	}
+	return false
 }

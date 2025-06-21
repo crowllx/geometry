@@ -11,8 +11,11 @@ import (
 )
 
 type Game struct {
-	shapes []geometry.Shape
-	player geometry.Shape
+	shapes      []geometry.Shape
+	player      geometry.Shape
+	player2     geometry.Shape
+	player3     geometry.Shape
+	activeShape geometry.Shape
 }
 
 func NewGame() *Game {
@@ -20,10 +23,16 @@ func NewGame() *Game {
 		[]geometry.Shape{
 			geometry.NewCircle(geometry.NewVector(800, 200), 100),
 			geometry.NewCircle(geometry.NewVector(300, 200), 100),
-			geometry.NewRect(200, 250, 250, 300),
+			geometry.NewRect(500, 250, 750, 500),
 		},
 		geometry.NewCircle(geometry.NewVector(0, 0), 30),
-		// &geometry.BB{0, 0, 50, 50},
+		geometry.NewRect(600, 600, 650, 650),
+		geometry.NewConvexPolygon(
+			geometry.NewVector(100, 0),
+			geometry.NewVector(200, 100),
+			geometry.NewVector(0, 100),
+		),
+		nil,
 	}
 }
 
@@ -69,6 +78,48 @@ func DrawShape(s geometry.Shape, screen *ebiten.Image) {
 			colornames.Pink,
 			false,
 		)
+	case *geometry.ConvexPolygon:
+		cp := s.(*geometry.ConvexPolygon)
+		bb := cp.BB()
+		vector.StrokeRect(
+			screen,
+			float32(bb.L),
+			float32(bb.T),
+			float32(bb.R-bb.L),
+			float32(bb.B-bb.T),
+			2,
+			colornames.Darkcyan,
+			false,
+		)
+
+		firstVec := cp.Vertices[0]
+		prevVec := firstVec
+		for _, vec := range cp.Vertices[1:] {
+			vector.StrokeLine(
+				screen,
+				float32(prevVec.X),
+				float32(prevVec.Y),
+				float32(vec.X),
+				float32(vec.Y),
+				1,
+				colornames.Purple,
+				false,
+			)
+		}
+		vector.StrokeLine(
+			screen,
+			float32(prevVec.X),
+			float32(prevVec.Y),
+			float32(firstVec.X),
+			float32(firstVec.Y),
+			1,
+			colornames.Purple,
+			false,
+		)
+
+		vector.DrawFilledCircle(
+			screen, float32(cp.Centroid().X), float32(cp.Centroid().Y), 2, colornames.Darkblue, false,
+		)
 
 	}
 
@@ -80,8 +131,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		DrawShape(shape, screen)
 	}
 	DrawShape(g.player, screen)
+	DrawShape(g.player2, screen)
+	DrawShape(g.player3, screen)
 	for _, shape := range g.shapes {
 		if g.player.Collides(shape) {
+			ebitenutil.DebugPrint(screen, "intersection!")
+		}
+		if g.player2.Collides(shape) {
 			ebitenutil.DebugPrint(screen, "intersection!")
 		}
 	}
@@ -94,6 +150,16 @@ func (g *Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, scr
 
 // Update implements ebiten.Game.
 func (g *Game) Update() error {
+	if ebiten.IsKeyPressed(ebiten.Key1) {
+		g.activeShape = g.player
+	}
+	if ebiten.IsKeyPressed(ebiten.Key2) {
+		g.activeShape = g.player2
+	}
+	if ebiten.IsKeyPressed(ebiten.Key3) {
+		g.activeShape = g.player3
+	}
+
 	x, y := 0.0, 0.0
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		y -= 1
@@ -109,7 +175,7 @@ func (g *Game) Update() error {
 	}
 
 	velocity := geometry.NewVector(x, y).Mult(2)
-	g.player.Translate(velocity)
+	g.activeShape.Translate(velocity)
 
 	return nil
 }
@@ -118,6 +184,7 @@ var _ ebiten.Game = &Game{}
 
 func main() {
 	g := NewGame()
+	g.activeShape = g.player
 
 	ebiten.SetWindowSize(1600, 900)
 	ebiten.SetWindowTitle("shapes")
