@@ -1,16 +1,15 @@
 package geometry
 
-import "math"
-
 type Shape interface {
 	BB() BB
 	Translate(Vector)
-    Collides(Shape) bool
+	Collides(Shape) bool
+	Rotate(float32, Vector)
 }
 
 func CircleRectCollision(c *Circle, r *Rect) bool {
-	closestX := math.Max(r.Min.X, math.Min(c.center.X, r.Max.X))
-	closestY := math.Max(r.Min.Y, math.Min(c.center.Y, r.Max.Y))
+	closestX := max(r.Min.X, min(c.center.X, r.Max.X))
+	closestY := max(r.Min.Y, min(c.center.Y, r.Max.Y))
 	dx := closestX - c.center.X
 	dy := closestY - c.center.Y
 	distance_squared := dx*dx + dy*dy
@@ -22,8 +21,8 @@ func CircleRectCollision(c *Circle, r *Rect) bool {
 }
 
 func CircleBBCollision(c *Circle, bb *BB) bool {
-	closestX := math.Max(bb.L, math.Min(c.center.X, bb.R))
-	closestY := math.Max(bb.T, math.Min(c.center.Y, bb.B))
+	closestX := max(bb.L, min(c.center.X, bb.R))
+	closestY := max(bb.T, min(c.center.Y, bb.B))
 	dx := closestX - c.center.X
 	dy := closestY - c.center.Y
 	distanceSquared := dx*dx + dy*dy

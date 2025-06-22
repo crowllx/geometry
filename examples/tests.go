@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/crowllx/geometry"
@@ -66,18 +67,6 @@ func DrawShape(s geometry.Shape, screen *ebiten.Image) {
 			false,
 		)
 
-	case *geometry.BB:
-		bb := s.(*geometry.BB)
-		vector.StrokeRect(
-			screen,
-			float32(bb.L),
-			float32(bb.T),
-			float32(bb.R-bb.L),
-			float32(bb.B-bb.T),
-			2,
-			colornames.Pink,
-			false,
-		)
 	case *geometry.ConvexPolygon:
 		cp := s.(*geometry.ConvexPolygon)
 		bb := cp.BB()
@@ -140,6 +129,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.player2.Collides(shape) {
 			ebitenutil.DebugPrint(screen, "intersection!")
 		}
+		if g.player3.Collides(shape) {
+			ebitenutil.DebugPrint(screen, "intersection!")
+		}
 	}
 }
 
@@ -160,7 +152,7 @@ func (g *Game) Update() error {
 		g.activeShape = g.player3
 	}
 
-	x, y := 0.0, 0.0
+	var x, y float32
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		y -= 1
 	}
@@ -185,6 +177,9 @@ var _ ebiten.Game = &Game{}
 func main() {
 	g := NewGame()
 	g.activeShape = g.player
+	w, h := g.player2.BB().Bounds()
+	w2, h2 := g.player2.(*geometry.Rect).Bounds()
+	fmt.Printf("%t %t", w == w2, h == h2)
 
 	ebiten.SetWindowSize(1600, 900)
 	ebiten.SetWindowTitle("shapes")

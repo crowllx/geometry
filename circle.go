@@ -2,7 +2,7 @@ package geometry
 
 type Circle struct {
 	center Vector
-	r      float64
+	r      float32
 }
 
 func (c Circle) BB() BB {
@@ -18,13 +18,17 @@ func (c Circle) Center() Vector {
 	return c.center
 }
 
-func (c Circle) Radius() float64 {
+func (c Circle) Radius() float32 {
 	return c.r
+}
+
+func (c *Circle) Rotate(angle float32, origin Vector) {
+	c.center = c.center.Rotate(angle, origin)
 }
 
 var _ Shape = &Circle{}
 
-func NewCircle(c Vector, r float64) *Circle {
+func NewCircle(c Vector, r float32) *Circle {
 	return &Circle{c, r}
 }
 
@@ -37,8 +41,6 @@ func (c *Circle) Collides(s Shape) bool {
 		switch s := s.(type) {
 		case *Rect:
 			return CircleRectCollision(c, s)
-		case *BB:
-			return true
 		case *Circle:
 			return CircleCircleCollision(c, s)
 		default:

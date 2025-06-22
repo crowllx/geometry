@@ -57,7 +57,7 @@ func (cp *ConvexPolygon) Collides(s Shape) bool {
 	return false
 }
 
-func (cp ConvexPolygon) Centroid() Vector {
+func (cp ConvexPolygon) Edges() []Edge {
 	var edges []Edge
 
 	for i := range len(cp.Vertices) - 1 {
@@ -65,14 +65,25 @@ func (cp ConvexPolygon) Centroid() Vector {
 	}
 	edges = append(edges, Edge{cp.Vertices[len(cp.Vertices)-1], cp.Vertices[0]})
 
-	var midX, midY float64
+	return edges
+}
+
+func (cp *ConvexPolygon) Rotate(angle float32, origin Vector) {
+	for i, vec := range cp.Vertices {
+		cp.Vertices[i] = vec.Rotate(angle, origin)
+	}
+}
+
+func (cp ConvexPolygon) Centroid() Vector {
+	edges := cp.Edges()
+	var midX, midY float32
 
 	for _, edge := range edges {
 		midX += (edge.a.X + edge.b.X) / 2
 		midY += (edge.a.Y + edge.b.Y) / 2
 	}
-	midX = midX / float64(len(edges))
-	midY = midY / float64(len(edges))
+	midX = midX / float32(len(edges))
+	midY = midY / float32(len(edges))
 
 	return NewVector(midX, midY)
 }
